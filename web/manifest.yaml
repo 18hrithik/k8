@@ -1,17 +1,17 @@
-# ConfigMap for nginx
+# ConfigMap with roboshop.conf
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: web
   namespace: roboshop
 data:
-  nginx.conf: |
+  roboshop.conf: |
     user www-data;
-    worker_processes 4;
+    worker_processes 1;
     pid /var/run/nginx.pid;
 
     events {
-      worker_connections 768;
+      worker_connections 1024;
     }
 
     http {
@@ -30,7 +30,6 @@ data:
       gzip_disable "msie6";
 
       include /etc/nginx/conf.d/*.conf;
-      include /etc/nginx/sites-enabled/*;
 
       server {
         listen 80;
@@ -39,13 +38,12 @@ data:
         location / {
             root /usr/share/nginx/html;
             index index.html index.htm;
-            ssi on;
         }
 
         location /images/ {
-            expires 5s;
             root /usr/share/nginx/html;
             try_files $uri /images/placeholder.png;
+            expires 5s;
         }
 
         error_page 500 502 503 504 /50x.html;
@@ -53,21 +51,12 @@ data:
             root /usr/share/nginx/html;
         }
 
-        location /api/catalogue/ {
-          proxy_pass http://catalogue:8080/;
-        }
-        location /api/user/ {
-          proxy_pass http://user:8080/;
-        }
-        location /api/cart/ {
-          proxy_pass http://cart:8080/;
-        }
-        location /api/shipping/ {
-          proxy_pass http://shipping:8080/;
-        }
-        location /api/payment/ {
-          proxy_pass http://payment:8080/;
-        }
+        location /api/catalogue/ { proxy_pass http://catalogue:8080/; }
+        location /api/user/ { proxy_pass http://user:8080/; }
+        location /api/cart/ { proxy_pass http://cart:8080/; }
+        location /api/shipping/ { proxy_pass http://shipping:8080/; }
+        location /api/payment/ { proxy_pass http://payment:8080/; }
+      }
     }
 
 ---
@@ -95,7 +84,7 @@ spec:
         project: roboshop
         tier: web
     spec:
-      # Init container waits for catalogue to be ready
+      # Init container waits for catalogue backend
       initContainers:
       - name: wait-for-catalogue
         image: busybox
@@ -113,7 +102,7 @@ spec:
         volumeMounts:
         - name: nginx-conf
           mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
+          subPath: roboshop.conf
           readOnly: true
         readinessProbe:
           httpGet:
@@ -132,8 +121,8 @@ spec:
         configMap:
           name: web
           items:
-            - key: nginx.conf
-              path: nginx.conf
+            - key: roboshop.conf
+              path: roboshop.conf
 
 ---
 # Web Service
