@@ -76,6 +76,7 @@ data:
         location /api/payment/ {
           proxy_pass http://payment.roboshop.svc.cluster.local:8080/;
         }
+      }
     }
 
 ---
