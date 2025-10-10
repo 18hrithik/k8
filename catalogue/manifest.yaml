@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cata
+  name: catalogue
   namespace: roboshop
 data:
   MONGO: "true"
@@ -9,42 +9,42 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cata
+  name: catalogue
   namespace: roboshop
   labels: # these labels are deployment labels
-    app: cata
+    app: catalogue
     project: roboshop
     tier: app
 spec:
   replicas: 1
   selector:
     matchLabels: # these labels are used to find the pods
-      app: cata
+      app: catalogue
       project: roboshop
       tier: app
   template:
     metadata:
       labels: # these labels are pod labels
-        app: cata
+        app: catalogue
         project: roboshop
         tier: app
     spec:
       containers:
-      - name: cata
-        image: madashrithik/cata:v1
+      - name: catalogue
+        image: joindevops/catalogue:v1
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
-            name: cata
+            name: catalogue
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cata
+  name: catalogue
   namespace: roboshop
 spec:
   selector:
-    app: cata
+    app: catalogue
     project: roboshop
     tier: app
   ports:
