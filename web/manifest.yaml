@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: roboshop/web:v1       # or roboshop/web:latest if available
+        image: madashrithik/web:v1       # or roboshop/web:latest if available
         ports:
         - containerPort: 80
         env:
